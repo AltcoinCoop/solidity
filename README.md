@@ -35,11 +35,20 @@ https://github.com/ethereum/dapp-bin/tree/master/getting%20started
 
 ### geth
 https://geth.ethereum.org/  
+* You want a fast computer with SSD storage
+* Download the livenet blockchain:
 ```
 $ brew tap ethereum/ethereum    
 $ brew install ethereum  
-$ geth --version  
+$ geth --version 
+$ geth --fast --rpc --cache:2048
 ```
+
+### Mist / Ether Wallet
+* Will use your local geth installation if it is running
+* Download and run from source or using release binaries
+https://github.com/ethereum/mist
+https://github.com/ethereum/mist/releases
 
 ### solcjs
 ```
