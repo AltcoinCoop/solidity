@@ -130,7 +130,7 @@ https://etherscan.io/
 * transactions - tpyes: contract creation, move funds to an account, call a contract method
 * message calls - calldata area, used in transactions
 * delegate calls - using caller context for library / util functions
-* Gas - gas price and gas amount set by transaction initiator. Used for code execution
+
 * Events & Logs
 * EVM - stack-based machine, contract storage and memory (runtime env)
 * throw
@@ -146,7 +146,14 @@ https://etherscan.io/
 * The unamed function with optional payability
 
 ## Gas
-* Estimating transaction gas cost:
+* Used for code execution. Transactions cost the caller gas. Calls are free.
+* Units are Wei (1000000000000000000 Wei = 1 eth). Usefull eth and weigh convertor: http://ether.fund/tool/converter  
+* Not needed when testing with testrpc
+* Needed when executing transactions with geth vs testnet or livenet (testnet gas is free)
+* Gas price - adjustable, meant to assure it doesn't go up with Ether USD exchange value.
+* Max block gas price - 
+* Set to 3,000,000 when calling a transaction. You will only be charged for actuall spent
+* Estimating a transaction gas cost:
 ```
 solc --gas MetaCoin.sol
 ```
