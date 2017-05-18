@@ -216,6 +216,8 @@ http://truffleframework.com/docs/getting_started/javascript-tests
 * Testing with docker
 * Coverage tool https://github.com/JoinColony/solcover
 * Testing Rollout - testrpc, testnet, beta on privte net, beta on public net, relase public net
+* Write modern clean jscript test code using the async/await pattern and not using cascading promises style. e.g. then() and catch() callbacks
+* Use truffle and testrpc for testing
 
 https://github.com/Capgemini-AIE/ethereum-docker  
 
