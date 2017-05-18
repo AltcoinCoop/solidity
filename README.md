@@ -85,7 +85,7 @@ $ sudo npm install -g ethereumjs-testrpc
 $ testrpc
 ```
 
-Testrpc dcoker
+Testrpc docker
 ```
 $ docker run -d -p 8545:8545 ethereumjs/testrpc:latest
 ```
@@ -114,11 +114,9 @@ https://openzeppelin.org/
 Truffle integration - use npm to install zepellin contracts
 
 ### Test Networks
-
 * Rinkeby (modern)  
 https://www.rinkeby.io/  -> connect yourself  
 Download the json file and follow the instructions  
-
 https://faucet.rinkeby.io/
 Get ether by creating a bpublic gist with your rinkeby account public key
 
@@ -139,7 +137,6 @@ https://etherscan.io/
 * transactions - tpyes: contract creation, move funds to an account, call a contract method
 * message calls - calldata area, used in transactions
 * delegate calls - using caller context for library / util functions
-
 * Events & Logs
 * EVM - stack-based machine, contract storage and memory (runtime env)
 * throw
@@ -162,7 +159,7 @@ https://etherscan.io/
 * Gas price - adjustable, meant to assure it doesn't go up with Ether USD exchange value.
 * Max block gas price - 
 * Set to 3,000,000 when calling a transaction. You will only be charged for actuall spent
-* Estimating a transaction gas cost:
+* Estimating transactions gas cost:
 ```
 solc --gas MetaCoin.sol
 ```
@@ -170,15 +167,17 @@ solc --gas MetaCoin.sol
 ## EVM Considirations
 * use explicit data type instead of var - for (var i=0; i < items.length;i++) - i is compiled to an uint8. If items.length > 255 then the loop will never terminate and deplate gas. Use explicit type instead without the var. e.g. - for (uint i=0; ...)
 * Avoid loops wherever possible - if a transaction exceeds its gas limit then it is rolled back but the gas is still paid. If a block reaches its gas limit then...
-* There are 20 kinds of overflow/underflow when working with the supported integeral data types - use safe math. e.g. SafeMath.sol
-* An attacker can reliably and easily make ANY call from inside your code to fail. The EVM call stack is limited to 1024 method calls. An attacker can always call a method 1023 times and call any contract's method on the 1024-th call - causing an overflow error in the next call made from implementation of the method. e.g. causing a send to always fail. As a workaround - use pull and not push to distirbute funds
-* Be aware of solidity bugs and issues - Soldity/EVM is a young tech (not yet v1.0)
+* There are 20 kinds of overflow/underflow when working with the supported integeral data types - use a safe math lib. e.g. SafeMath.sol
+* An attacker can reliably and easily make ANY call from inside your code to fail. The EVM call stack is limited to 1024 method calls. An attacker can always call a method 1023 times and call any contract's method on the 1024-th call - causing an overflow error in the next call made from implementation of the method. e.g. causing a send to always fail. As a workaround - use pull pattern (e.g. Payable.sol in Zeppelin) and not a push pattern to distirbute funds
+* Be aware of solidity bugs and issues - Soldity/EVM is a young pre 1.0 tech 
 https://github.com/ethereum/solidity/issues/
 
 ## Fundemental Design Tradeoffs
 * Mistakes can be very costley. Unlike web apps, deployed contracts are hard to modify 
 * Modular vs. Monolith - upgradeable vs. less complex, easier to test and to reason about
-* Code Resuse vs. Duplicate - should you trust other people contracts ?
+* Code Resuse vs. Duplication - should you trust other people contracts ?
+* Make contracts as short and as simple as possible
+* Write extensive unit tests and run them on both testrpc and testnets which behave different from each other
 
 ---
 ## Data Structures, Libraries and Utils
@@ -188,8 +187,9 @@ https://github.com/ethereum/solidity/issues/
 * structs
 * mappings - associative arrays with all non-existing items map to 0/null
 * state vars
+Should suffice for most contracts. Additional data types add complexity
 
-### Std
+### std
 https://github.com/ethereum/solidity/tree/develop/std
 
 ### Additional Data Structures
@@ -198,7 +198,7 @@ https://github.com/ethereum/dapp-bin/tree/master/library
 ### key-value Stores
 https://github.com/ConsenSys/dapp-store-contracts  
 
-### Live Libs Project
+### live Libs Project
 https://github.com/consensys/live-libs
 
 ---
@@ -210,8 +210,8 @@ https://github.com/consensys/live-libs
 https://github.com/ethereumjs/testrpc
 http://truffleframework.com/docs/getting_started/javascript-tests
 ```
-* Testing a private test network
-* Testing with a public testnet
+* Testing using a private test network
+* Testing using a public testnet
 * Security audits options
 * Testing with docker
 * Coverage tool https://github.com/JoinColony/solcover
@@ -220,7 +220,8 @@ http://truffleframework.com/docs/getting_started/javascript-tests
 https://github.com/Capgemini-AIE/ethereum-docker  
 
 ## Debugging, Logging & Events
-
+Use events to log transactions
+* To index or not to index?
 * Events use cases intro - https://media.consensys.net/technical-introduction-to-events-and-logs-in-ethereum-a074d65dd61e
 
 ## Disassembliy and Decompilers
@@ -236,6 +237,7 @@ https://github.com/raineorshine/solgraph
 
 ## Community Standards
 * ERC20 - standard coin: https://github.com/ethereum/EIPs/issues/20
+* Standard tokens implemented in Zeppelin
 
 ## Coding Style Guide
 http://solidity.readthedocs.io/en/latest/style-guide.html
@@ -247,7 +249,7 @@ https://solidity.readthedocs.io/en/develop/security-considerations.html
 https://github.com/ethereum/dapp-bin/tree/master/standardized_contract_apis  
 
 * Beware of external contracts calls - they can call back to your contract and change its control flow
-* Private data is viewable by anyone
+* Private data is viewable by anyone but no getters are generated
 * All your public contract methods may be called maliciously
 * Bug bounty hunt your contracts on a test network and perform security audits with highly reputable 3rd parties
 * Follow platform security notifications: https://blog.ethereum.org/category/security/
@@ -267,17 +269,19 @@ https://blog.ethereum.org/2016/06/19/thinking-smart-contract-security/
 
 ## Design Patterns
 
-### Factory
-A contract for registration of contract addresses deployed by an external account address   
-
 ### Pre, Mutate & Interact
 * Arguably a result of the famous DAO bug
 * Check all pre-conditions first before modifying any state. Interact with external contracts only after state is modified
+* The most importnat pattern that every method should implement
+
+### Factory
+A contract for registration of contract addresses deployed by an external account address   
 
 ### Throw Loudly
 * Any pre-condition failure should throw excplicitally, beofore any state modificaiton is performed
 * Test and throw for each pre-condition seprately
 * Use this consistnelty in all code instead of conditional executaiton after a pre-condition check in an if statement
+* No need to return boolean if method succeeds - it implicitly succeeds if a transaction was creation and nothing was thrown from its implementation
  
 ### Auto Bug Bounty
 * Build invariants calculation into your contract - contract state is valid while all invariants hold
@@ -296,18 +300,20 @@ It is recommended that contracts that store large ammounts of funds will not be 
 * Convert magic numbers such as 15 days to a contract constant
 
 ### Withdraw 
-* Don't send money - let other widthdraw what they are authorized to get - favor pull vs. push payments. Issues with send: https://github.com/ConsenSys/Ethereum-Development-Best-Practices/wiki/Fallback-functions-and-the-fundamental-limitations-of-using-send%28%29-in-Ethereum-&-Solidity#abuse
+* Don't send money - let account withdraw payments that they are authorized to get from a contract - favor pull vs. push payments. Issues with send: https://github.com/ConsenSys/Ethereum-Development-Best-Practices/wiki/Fallback-functions-and-the-fundamental-limitations-of-using-send%28%29-in-Ethereum-&-Solidity#abuse
 
 ### Time
 * block.timestamp === Now() - epoch time in secs - can be manipulated by miners. Don't use this.
-* Block numbers and average block time as approximate time units - block.number - assumes a constant rate of block generation in the future which may not be accurate - use with care. https://ethereum.stackexchange.com/questions/413/can-a-contract-safely-rely-on-block-timestamp
+* block.number - Block numbers and average block time are an approximate time unit assuming block time remains in the same range (15-20 seconds) but this is not guaranteed - use with care. https://ethereum.stackexchange.com/questions/413/can-a-contract-safely-rely-on-block-timestamp
 
-### Fallback
-* Fallback function called when ether is sent using .send() to a contract's address
+### Payable Fallback
+* The Fallback function is called when ether is sent using .send() to a contract's address
+* Must be decorated with payable otherwise an exception is thrown when an account or contract is trying to send() ether to it
 * Must use under 2,300 gas - enough only for logging - don't do more stuff here
+* Test using web3.sendTransaction
 
-### Circut Breaker
-Designing for failure and worse-case scenarios
+### Circut Breakers - Pausable, Destructable
+* Designing for failure and worse-case scenarios
 
 ### Risk Management
 * Rate limiting
@@ -325,8 +331,17 @@ https://github.com/ConsenSys/smart-contract-best-practices
 ---
 
 ## Crowd Funding Patterns
+* Do a bounty hunt before deployment
+* Distribute a dapp for easy interaction
+* Provide multiple means to participate
+* Advertise campagain official address in several outlets to avoid fake scams
+* Provide a website with progress (funding goal, total funded, time left to fund)
+* Perform security audits by a trusted 3rd party
+* Keep contract as simple as possible
+* Test on testnet and on testnets - they behave differently 
 
 ### Crowd Funding Campaigns - design and implementation examples
+
 * Golem Campaign    
 https://blog.golemproject.net/the-golem-crowdfunding-summary-8a3504375aa7  
 https://blog.golemproject.net/gnt-crowdfunding-contract-in-pictures-d6b5a2e69150  
